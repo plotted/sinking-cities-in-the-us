@@ -1,0 +1,29 @@
+City,State,Abbr,Mean,Latitude,Longitude
+New York,New York,NY,-2.430,40.7128,-74.006
+Los Angeles,California,CA,-0.729,34.0522,-118.2437
+Chicago,Illinois,IL,-2.323,41.8781,-87.6298
+Houston,Texas,TX,-5.216,29.7604,-95.3698
+Phoenix,Arizona,AZ,-0.846,33.4484,-112.074
+Philadelphia,Pennsylvania,PA,-0.735,39.9526,-75.1652
+San Antonio,Texas,TX,-1.099,29.4241,-98.4936
+San Diego,California,CA,-1.076,32.7157,-117.1611
+Dallas,Texas,TX,-3.846,32.7767,-96.797
+San Jose,California,CA,0.219,37.3382,-121.8863
+Austin,Texas,TX,-0.792,30.2672,-97.7431
+Jacksonville,Florida,FL,0.452,30.3322,-81.6557
+Fort Worth,Texas,TX,-4.366,32.7555,-97.3308
+Columbus,Ohio,OH,-1.934,39.9612,-82.9988
+Indianapolis,Indiana,IN,-1.423,39.7684,-86.1581
+Charlotte,North Carolina,NC,-1.507,35.2271,-80.8431
+San Francisco,California,CA,-0.857,37.7749,-122.4194
+Seattle,Washington,WA,-1.847,47.6062,-122.3321
+Denver,Colorado,CO,-1.714,39.7392,-104.9903
+Washington,District of Columbia,DC,-1.283,38.9072,-77.0369
+Nashville,Tennessee,TN,-1.133,36.1627,-86.7816
+Oklahoma City,Oklahoma,OK,-1.283,35.4676,-97.5164
+El Paso,Texas,TX,-0.754,31.7619,-106.485
+Boston,Massachusetts,MA,-0.478,42.3601,-71.0589
+Portland,Oregon,OR,-0.922,45.5051,-122.675
+Las Vegas,Nevada,NV,-0.841,36.1699,-115.1398
+Detroit,Michigan,MI,-1.726,42.3314,-83.0458
+Memphis,Tennessee,TN,0.006,35.1495,-90.049

@@ -1,0 +1,44 @@
+# Sinking Cities Across America
+
+
+This repository contains code in R to replicate the following graphic:
+
+  
+
+![Daily Average Sea Surface Temperatures
+1982-2023](source/sinking-cities.png)
+
+## Source
+
+- Title: **Across America, Big Cities Are Sinking. Here’s Why**
+
+- Author(s): Mira Rojanasakul
+
+- Date: May 8, 2025
+
+- From: New York Times
+
+- URL:
+  <https://www.nytimes.com/interactive/2025/05/08/climate/sinking-cities-us-causes-groundwater.html>
+
+- PDF:
+  [Sinking-Cities-US-Causes-Groundwater-NYT.pdf](source/Sinking-Cities-US-Causes-Groundwater-NYT.pdf)
+
+## Data
+
+Data from Nature paper: **Land subsidence risk to infrastructure in US
+metropolises**, by Ohenhen et al (May 8, 2025)
+
+<https://www.nature.com/articles/s44284-025-00240-y#MOESM4>
+
+Refer to the *section data* (in the above paper) for figures 1-4
+<https://www.nature.com/articles/s44284-025-00240-y#Sec15>.
+
+The URL to download the Excel file is:
+
+<https://static-content.springer.com/esm/art%3A10.1038%2Fs44284-025-00240-y/MediaObjects/44284_2025_240_MOESM4_ESM.xlsx>
+
+In addition to the above Excel file, we curated a CSV file
+`land-subsidence-risk-data1.csv` that also contains coordinates
+(longitude and latitude) of the cities, and whether they are sinking or
+not.

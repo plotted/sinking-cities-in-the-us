@@ -1,0 +1,276 @@
+---
+title: "Sinking Cities Across America"
+format: html
+embed-resources: true
+---
+
+```{r pkgs, message = FALSE, echo = FALSE}
+library(tidyverse)     # ecosystem of data science packages
+library(readxl)        # to import Excel files
+library(sf)            # simple features (spatial vector data)
+library(rnaturalearth) # database of maps
+library(usmap)         # map of the U.S.
+library(ggiraph)       # make ggplots interactive
+```
+
+
+# Description
+
+New York Times article: __Across America, Big Cities Are Sinking. Here's Why__,
+by Mira Rojanasakul (May 8, 2025)
+
+<https://www.nytimes.com/interactive/2025/05/08/climate/sinking-cities-us-causes-groundwater.html>
+
+![Sinking Cities US Causes Groundwater](source/sinking-cities.png)
+
+\
+
+## Details (datasheet)
+
+Data from Nature paper: __Land subsidence risk to infrastructure in US metropolises__,
+by Ohenhen et al (May 8, 2025)
+
+<https://www.nature.com/articles/s44284-025-00240-y#MOESM4>
+ 
+
+Source data for figures 1-4: <https://static-content.springer.com/esm/art%3A10.1038%2Fs44284-025-00240-y/MediaObjects/44284_2025_240_MOESM4_ESM.xlsx>
+
+
+## R packages
+
+```{r pkgs, eval = FALSE}
+```
+
+
+-----
+
+
+# Data
+
+
+Data Repository:
+
+<https://data.lib.vt.edu/articles/dataset/Land_Subsidence_Risk_in_US_Metropolises/27606942>
+
+\
+
+Assuming that you've downloaded the Excel file `44284_2025_240_MOESM4_ESM.xlsx`
+associated to figures 1 to 4, you can use `read_excel()` to import the first
+spreadsheet into a tibble like so:
+
+```{r eval = FALSE}
+# import data
+dat = read_excel(
+  path = "data/44284_2025_240_MOESM4_ESM.xlsx", 
+  sheet = 1, 
+  range = "A1:E29")
+```
+
+
+Because we also need the coordinates (longitude and latitude) of the cities,
+we used ChatGPT-4 to find such coordinates, and we curated a CSV file 
+`land-subsidence-risk-data1.csv`. This is the data file that we're going to
+use for this module.
+
+```{r}
+# import data
+dat = read_csv(
+  file = "data/land-subsidence-risk-data1.csv", 
+  show_col_types = FALSE) |> 
+  mutate(Type = case_when(
+    Mean < 0 ~ "down",
+    Mean >= 0 ~ "up"))
+
+dat
+```
+
+The first four columns (`City`, `State`, `Abbr`, and `Mean`) come from the 
+excel file. The columns `Latitude` and `Longitude` come from ChatGPT. Finally,
+the `Type` column indicates whether a city has been sinking (`down`) or not 
+(`up`).
+
+
+-----
+
+
+# Graphics
+
+Let's graph a couple of slightly different maps of the Continental U.S.
+
+
+## `ne_states()` Map 1
+
+To make the map of the continental U.S. we can use data from `ne_states()`,
+and then superimpose the coordinates of the cities:
+
+```{r}
+# map of usa
+usa_map = ne_states(country = "United States of America")
+
+ggplot() +
+  geom_sf(data = usa_map) +
+  coord_sf(xlim = c(-125, -67), ylim = c(25, 50)) +
+  geom_point(data = dat, aes(x = Longitude, y = Latitude)) +
+  theme_void()
+```
+
+
+## `ne_states()` Map 2
+
+Next, we add the names of cities via `geom_text()`, and also modify the shape 
+of the points by mapping `shape = Type`, and color-coding `fill = Type` as well:
+
+```{r}
+ggplot() +
+  geom_sf(data = usa_map, fill = "#f2f2f2" , color = "#d8d8d8") +
+  coord_sf(xlim = c(-125, -67), ylim = c(25, 50)) +
+  geom_point(data = dat, color = "#FFFFFF00",
+             aes(x = Longitude, y = Latitude, size = abs(Mean), 
+                 shape = Type, fill = Type)) +
+  scale_shape_manual(values = c(25, 24)) +
+  geom_text(data = dat, 
+            vjust = -1, size = 2.5,
+            aes(x = Longitude, y = Latitude, label = City)) + 
+  theme_void()
+```
+
+
+## `ne_states()` Map 3
+
+Next, we add the names States (abbreviations). This requires to compute the
+centroids for each stat polygon with the function `st_centroid()`
+
+```{r warning=FALSE}
+state_centroids = st_centroid(usa_map)
+
+ggplot() +
+  geom_sf(data = usa_map, fill = "#f2f2f2" , color = "#d8d8d8") +
+  coord_sf(xlim = c(-125, -67), ylim = c(25, 50)) +
+  geom_text(data = state_centroids, 
+            vjust = -1, size = 2.5, color = "#a8a8a8",
+            aes(x = longitude, y = latitude, label = postal)) + 
+  geom_point(data = dat, color = "#FFFFFF00",
+             aes(x = Longitude, y = Latitude, size = abs(Mean), 
+                 shape = Type, fill = Type)) +
+  scale_shape_manual(values = c(25, 24)) +
+  geom_text(data = dat, 
+            vjust = -1, size = 2.5,
+            aes(x = Longitude, y = Latitude, label = City)) + 
+  theme_void()
+```
+
+
+## `ne_states()` Map 4
+
+Instead of displaying points with triangular shapes, we can substitute the
+type of geom to `geom_segment()`. The idea is to display vertical segments
+with arrowheads pointing down or up depending on whether the __Mean VLM__ 
+of a city is negative or positive.
+
+```{r}
+# trying to get better shapes (longer triangles or line segments?)
+# fixing longitude, but stretching latitudes
+dat$Latitude2 = dat$Latitude + dat$Mean
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = usa_map, fill = "#f2f2f2" , color = "#d8d8d8") +
+  coord_sf(xlim = c(-125, -67), ylim = c(25, 50)) +
+  geom_text(data = state_centroids, 
+            vjust = -1, size = 2.5, color = "#a8a8a8",
+            aes(x = longitude, y = latitude, label = postal)) + 
+  geom_segment(data = dat, arrow = arrow(length = unit(0.1, "cm")),
+               aes(x = Longitude, y = Latitude, 
+                   xend = Longitude, yend = Latitude2,
+                   color = Type)) +
+  geom_text(data = dat, 
+            vjust = -0.5, size = 2.5,
+            aes(x = Longitude, y = Latitude, label = City)) + 
+  theme_void()
+```
+
+
+-----
+
+
+# Maps with `usmap::us_map()`
+
+Another option is to use map data from package `"us_map"`. This one has a 
+closer visual appearance to the map in the NYT article that we want to replicate.
+
+
+## `us_map()` Map 1
+
+Because `us_map()` includes Alaska and Hawaii, we need to remove them from 
+the data map. Also, we need to transform the latitude and longitude values in
+`dat` in order to make them compatible with the projection used by `us_map()`.
+
+```{r}
+# filter out Alaska and Hawaii
+usa_map2 = us_map(regions = "states") |> 
+  filter(abbr != "AK" & abbr != "HI")
+
+# Important: Convert spatial data (e.g. lon, lat) to "usmap" projection
+dat2 = usmap_transform(
+  data = dat, 
+  input_names = c("Longitude", "Latitude"))
+
+# map
+ggplot() +
+  geom_sf(data = usa_map2) +
+  geom_sf(data = dat2) +
+  theme_void()
+```
+
+
+## `us_map()` Map 2
+
+Adding Names of Cities and States
+
+```{r}
+ggplot() +
+  geom_sf(data = usa_map2, fill = "#f2f2f2" , color = "#d8d8d8") +
+  geom_sf_text(data = usa_map2, aes(label = abbr), 
+               color = "#a8a8a8", size = 2.5) +
+  geom_sf(data = dat2, color = "#FFFFFF00",
+          aes(size = abs(Mean), shape = Type, fill = Type)) +
+  scale_shape_manual(values = c(25, 24)) +
+  geom_sf_text(data = dat2, 
+            vjust = -1, size = 2.5,
+            aes(label = City)) + 
+  theme_void()
+```
+
+
+## `us_map()` Map 3
+
+Adding vertical line segments with the `geom_segment()` function, and also
+the `after_stat()` transformation and `stat_sf_coordinates()`.
+
+See <https://ggplot2.tidyverse.org/reference/stat_sf_coordinates.html> for
+details about this approach.
+
+Note: It would be nice to add an arrowhead but given the coordinate values 
+used by `us_map()`, I'm getting some arrowheads in the wrong direction :(
+
+```{r}
+ggplot() +
+  geom_sf(data = usa_map2, fill = "#f2f2f2" , color = "#d8d8d8") +
+  geom_sf_text(data = usa_map2, aes(label = abbr), 
+               color = "#a8a8a8", size = 2.5) +
+  geom_sf_text(data = dat2, 
+            vjust = -1, size = 2.5,
+            aes(label = City)) + 
+  geom_segment(data = dat2, linewidth = 1,
+               #arrow = arrow(length = unit(0.12, "cm")),
+    aes(geometry = geometry,
+        x = after_stat(x),
+        y = after_stat(y),
+        xend = after_stat(x),
+        yend = after_stat(y) + 100000 * dat2$Mean,
+        color = Type),
+    stat = "sf_coordinates") +
+  theme_void()
+```
+
